@@ -34,6 +34,11 @@ namespace DormMarket
                 //base on apply filter list only include by the search bar text
             }
         }
-
+        private void btnProfile_Click((object sender, EventArgs e)
+        {
+            var profile = new ManageProfileStudent();
+            profile.Show();
+            this.Hide();
+        }
     }
 }
