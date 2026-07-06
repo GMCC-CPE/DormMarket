@@ -24,5 +24,11 @@ namespace DormMarket
             message.Show();
             this.Hide();
         }
+        private void btnProfile_Click((object sender, EventArgs e)
+        {
+            var profile = new ManageProfileStudent();
+            profile.Show();
+            this.Hide();
+        }
     }
 }
