@@ -12,15 +12,15 @@ namespace DormMarket
 
         private void btnStudentContinue_Click(object sender, EventArgs e)// student continue button
         {
-            var login = new Registerstudent();
+            var login = new LoginStudent();
             login.Show();
             this.Hide();
         }
 
         private void btnOwnerContinue_Click(object sender, EventArgs e)//Owner continue button
         {
-            var ownerAuth = new LoginRegisterAdmin();
-            ownerAuth.Show();
+            var owner = new LoginOwner();
+            owner.Show();
             this.Hide();
         }
     }
