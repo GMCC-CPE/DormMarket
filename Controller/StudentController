@@ -1,0 +1,18 @@
+using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
+
+public class StudentController : Controller
+{
+    private readonly Dtbservice _mongoService;
+
+    public StudentController(Dtbservice mongoService)
+    {
+        _mongoService = mongoService;
+    }
+
+    public IActionResult Index()
+    {
+        var students = mongoService.Students.Find(_ => true).ToList();
+        return View(students);
+    }
+}
