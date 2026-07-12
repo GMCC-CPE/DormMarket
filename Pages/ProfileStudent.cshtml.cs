@@ -14,7 +14,7 @@ namespace GMCC.Pages
         public void OnGet()
         {
         }
-        public isActionResult OnPostBrowse()
+        public IActionResult OnPostBrowse()
         {
             return RedirectToPage("/BrowseDormStudent");
         }

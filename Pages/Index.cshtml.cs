@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace dormMarket.Pages
+namespace GMCC.Pages
 {
     public class RoleModel : PageModel
     {

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 
-namespace GMCC.Pages.Shared
+namespace GMCC.Pages
 {
     public class AddDormOwner : PageModel
     {
