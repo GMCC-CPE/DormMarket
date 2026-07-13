@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -40,7 +42,20 @@ namespace GMCC.Pages
                 return Page();
             }
 
-            // insert Database code here to save the user information to the database
+            // TODO (DB teammate): replace Owners store below with a real DB insert.
+            if (Owners.EmailExists(Email))
+            {
+                ErrorMessage = "An account with this email already exists.";
+                return Page();
+            }
+
+            Owners.Add(new OwnerAccount //temporary save owner info, change after Database implementation
+            {
+                FullName = FullName,
+                Email = Email,
+                ContactNumber = ContactNumber,
+                Password = Password 
+            });
 
             SuccessMessage = "Account created successfully. Please log in.";
             return RedirectToPage("/LoginOwner");
@@ -63,5 +78,25 @@ namespace GMCC.Pages
                 return false;
             }
         }
+    }
+
+    public static class Owners //temporary owner added into list, change after Database implementation
+    {
+        private static readonly List<OwnerAccount> _owners = new();
+
+        public static bool EmailExists(string email) =>
+            _owners.Any(o => o.Email.Equals(email, StringComparison.OrdinalIgnoreCase));//change when Database implement
+
+        public static void Add(OwnerAccount owner) => _owners.Add(owner);
+
+        public static OwnerAccount? FindByEmail(string email) =>
+            _owners.FirstOrDefault(o => o.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+    }
+    public class OwnerAccount
+    {
+        public string FullName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string ContactNumber { get; set; } = "";
+        public string Password { get; set; } = "";
     }
 }

@@ -43,8 +43,20 @@ namespace GMCC.Pages
                 ErrorMessage = "Please enter a valid email address.";
                 return Page();
             }
+////////////////////
+            if (Students.EmailExists(Email))
+            {
+                ErrorMessage = "An account with this email already exists.";
+                return Page();
+            }
 
-            // insert Database code here to save the user information to the database
+            Students.Add(new StudentAccount
+            {
+                FullName = FullName,
+                Email = Email,
+                ContactNumber = ContactNumber,
+                Password = Password // change if database is implemented
+            });
 
             SuccessMessage = "Account created successfully. Please log in.";
             return RedirectToPage("/LoginStudent");
@@ -67,5 +79,27 @@ namespace GMCC.Pages
                 return false;
             }
         }
+    }
+
+    public static class Students//temporary before Database
+    {
+        private static readonly List<StudentAccount> _students = new();
+
+        public static bool EmailExists(string email) =>
+            _students.Any(s => s.Email.Equals(email, StringComparison.OrdinalIgnoreCase));//change when Database implement
+
+        public static void Add(StudentAccount student) => _students.Add(student);
+
+        public static StudentAccount? FindByEmail(string email) =>
+            _students.FirstOrDefault(s => s.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+    }
+
+    // Placeholder model — DB teammate can move this into Models.cs and map it to the real Students table.
+    public class StudentAccount
+    {
+        public string FullName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string ContactNumber { get; set; } = "";
+        public string Password { get; set; } = "";
     }
 }

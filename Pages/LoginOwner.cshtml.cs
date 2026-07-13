@@ -28,7 +28,20 @@ namespace GMCC.Pages
 
         public IActionResult OnPost()
         {
-           return RedirectToPage("/DashboardOwner");
+            if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
+            {
+                ErrorMessage = "Please enter both email and password.";
+                return Page();
+            }
+            
+            var owner = Owners.FindByEmail(Email);
+            if (owner == null || owner.Password != Password)
+            {
+                ErrorMessage = "Invalid email or password.";
+                return Page();
+            }
+
+            return RedirectToPage("/DashboardOwner");
         }
 
         public IActionResult OnPostForgotPassword()
