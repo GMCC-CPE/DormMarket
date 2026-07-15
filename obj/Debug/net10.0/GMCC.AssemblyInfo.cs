@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GMCC")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4979fd71f2e4320fb209ae0eb30a8a1abf59c0a3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b93b8a435b62c2c662976d2fcb14f75b8ba835a4")]
 [assembly: System.Reflection.AssemblyProductAttribute("GMCC")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GMCC")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
