@@ -1,0 +1,337 @@
+@page
+@model GMCC.Pages.RenterVerify
+@{
+    ViewData["Title"] = "RenterVerify";
+    Layout = null;
+}
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f9fafb;
+        margin: 0;
+        padding: 20px;
+        padding-bottom: 40px;
+    }
+
+    .container {
+        max-width: 560px;
+        margin: 0 auto;
+    }
+
+    .back-link {
+        display: inline-block;
+        color: #6b7280;
+        text-decoration: none;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .back-link:hover {
+        color: #1f2937;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 24px;
+    }
+
+    .card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        padding: 24px;
+        margin-bottom: 16px;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 6px;
+        letter-spacing: 0.03em;
+    }
+
+    .form-input, .form-select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        box-sizing: border-box;
+        background: #fff;
+    }
+
+    .form-input::placeholder {
+        color: #9ca3af;
+    }
+
+    .file-upload {
+        border: 2px dashed #d1d5db;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+
+    .file-upload:hover {
+        border-color: #374151;
+    }
+
+    .file-upload-icon {
+        font-size: 32px;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .file-upload-text {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .file-upload-hint {
+        font-size: 11px;
+        color: #9ca3af;
+        margin-top: 4px;
+    }
+
+    .file-upload input[type="file"] {
+        display: none;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 12px 0;
+        background: #374151;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 8px;
+    }
+
+    .btn-skip {
+        width: 100%;
+        padding: 12px 0;
+        background: transparent;
+        color: #6b7280;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: background 0.2s;
+    }
+
+    .btn-skip:hover {
+        background: #f3f4f6;
+    }
+
+    .info-box {
+        background: #f3f4f6;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 13px;
+        color: #6b7280;
+        margin-top: 12px;
+        line-height: 1.6;
+    }
+
+    .info-box strong {
+        color: #1f2937;
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 13px;
+        text-align: center;
+        margin-bottom: 16px;
+    }
+
+    .success-message {
+        color: #16a34a;
+        font-size: 13px;
+        text-align: center;
+        margin-bottom: 16px;
+    }
+
+    .radio-group {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .radio-option {
+        flex: 1;
+        padding: 16px;
+        border: 2px solid #d1d5db;
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s;
+        background: #fff;
+    }
+
+    .radio-option:hover {
+        border-color: #374151;
+    }
+
+    .radio-option.selected {
+        border-color: #374151;
+        background: #f9fafb;
+    }
+
+    .radio-option input[type="radio"] {
+        display: none;
+    }
+
+    .radio-option .radio-icon {
+        font-size: 24px;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .radio-option .radio-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .radio-option .radio-desc {
+        font-size: 11px;
+        color: #6b7280;
+        margin-top: 2px;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+
+<div class="container">
+    <a href="/StudentProfile" class="back-link">← Back to Profile</a>
+    
+    <h1 class="page-title">Have You Rented a Dorm Yet?</h1>
+    <p class="page-subtitle">This helps us verify your renter status.</p>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="error-message">@Model.ErrorMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="success-message">@Model.SuccessMessage</div>
+    }
+
+    <div class="card">
+        <form method="post" enctype="multipart/form-data">
+            <!-- Radio selection -->
+            <div class="radio-group">
+                <label class="radio-option" id="rentedBeforeOption">
+                    <input type="radio" name="RentedBefore" value="true" onchange="toggleRentedFields(true)" />
+                    <span class="radio-icon">✅</span>
+                    <div class="radio-label">Yes, I've Rented Before</div>
+                    <div class="radio-desc">Upload proof of stay below</div>
+                </label>
+                <label class="radio-option" id="newRenterOption">
+                    <input type="radio" name="RentedBefore" value="false" onchange="toggleRentedFields(false)" />
+                    <span class="radio-icon">🏠</span>
+                    <div class="radio-label">I'm a New Renter</div>
+                    <div class="radio-desc">Haven't moved in anywhere yet</div>
+                </label>
+            </div>
+
+            <!-- Rented fields (hidden by default) -->
+            <div id="rentedFields" class="hidden">
+                <div class="form-group">
+                    <label class="form-label">DORMITORY YOU RENTED / ARE RENTING</label>
+                    <select class="form-select" asp-for="Dormitory">
+                        <option value="">Select or type dormitory name</option>
+                        <option value="Casa Verde Dormitory">Casa Verde Dormitory</option>
+                        <option value="Sunrise Dormitory">Sunrise Dormitory</option>
+                        <option value="Green Residence">Green Residence</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">PROOF OF STAY (CONTRACT, RECEIPT, OR DORM ID)</label>
+                    <div class="file-upload" onclick="document.getElementById('proofFile').click()">
+                        <span class="file-upload-icon">📄</span>
+                        <div class="file-upload-text">Upload file (JPG, PNG or PDF, max 10MB)</div>
+                        <div class="file-upload-hint" id="proofFileName">No file chosen</div>
+                        <input type="file" id="proofFile" name="ProofFile" accept=".jpg,.jpeg,.png,.pdf" onchange="updateProofFileName(this)" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">STAY PERIOD</label>
+                    <div style="display:flex; gap:12px;">
+                        <input type="date" class="form-input" asp-for="MoveInDate" style="flex:1;" />
+                        <input type="date" class="form-input" asp-for="MoveOutDate" style="flex:1;" placeholder="or Present" />
+                    </div>
+                </div>
+
+                <button type="submit" asp-page-handler="SubmitProof" class="btn-submit">Submit for Verification</button>
+            </div>
+
+            <button type="submit" asp-page-handler="NeverRented" class="btn-skip" id="skipBtn">Skip for Now, Continue Browsing</button>
+        </form>
+    </div>
+
+    <div class="info-box">
+        <strong>New Renter? No problem.</strong><br />
+        You can skip this step for now. You'll still be able to browse dorms, message owners, and even post a review - it'll just show without the "Verified Renter" badge until you move in and upload proof of stay. Come back to Profile → Rental Verification anytime once you have it.
+    </div>
+</div>
+
+<script>
+    function toggleRentedFields(isRentedBefore) {
+        const rentedFields = document.getElementById('rentedFields');
+        const skipBtn = document.getElementById('skipBtn');
+        
+        if (isRentedBefore) {
+            rentedFields.classList.remove('hidden');
+            skipBtn.classList.add('hidden');
+            document.getElementById('rentedBeforeOption').classList.add('selected');
+            document.getElementById('newRenterOption').classList.remove('selected');
+        } else {
+            rentedFields.classList.add('hidden');
+            skipBtn.classList.remove('hidden');
+            document.getElementById('newRenterOption').classList.add('selected');
+            document.getElementById('rentedBeforeOption').classList.remove('selected');
+        }
+    }
+
+    function updateProofFileName(input) {
+        const fileName = document.getElementById('proofFileName');
+        if (input.files.length > 0) {
+            fileName.textContent = input.files[0].name;
+        } else {
+            fileName.textContent = 'No file chosen';
+        }
+    }
+</script>

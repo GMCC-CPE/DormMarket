@@ -1,0 +1,256 @@
+@page
+@model GMCC.Pages.VerifyStudent
+@{
+    ViewData["Title"] = "VerifyStudent";
+    Layout = null;
+}
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f9fafb;
+        margin: 0;
+        padding: 20px;
+        padding-bottom: 40px;
+    }
+
+    .container {
+        max-width: 560px;
+        margin: 0 auto;
+    }
+
+    .back-link {
+        display: inline-block;
+        color: #6b7280;
+        text-decoration: none;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .back-link:hover {
+        color: #1f2937;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 24px;
+        line-height: 1.5;
+    }
+
+    .card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        padding: 24px;
+        margin-bottom: 16px;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 6px;
+        letter-spacing: 0.03em;
+    }
+
+    .form-input, .form-select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        box-sizing: border-box;
+        background: #fff;
+    }
+
+    .form-input::placeholder {
+        color: #9ca3af;
+    }
+
+    .file-upload {
+        border: 2px dashed #d1d5db;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+
+    .file-upload:hover {
+        border-color: #374151;
+    }
+
+    .file-upload-icon {
+        font-size: 32px;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .file-upload-text {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .file-upload-hint {
+        font-size: 11px;
+        color: #9ca3af;
+        margin-top: 4px;
+    }
+
+    .file-upload input[type="file"] {
+        display: none;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 12px 0;
+        background: #374151;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 8px;
+    }
+
+    .btn-skip {
+        width: 100%;
+        padding: 12px 0;
+        background: transparent;
+        color: #6b7280;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: background 0.2s;
+    }
+
+    .btn-skip:hover {
+        background: #f3f4f6;
+    }
+
+    .info-box {
+        background: #f3f4f6;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 13px;
+        color: #6b7280;
+        margin-top: 12px;
+    }
+
+    .info-box strong {
+        color: #1f2937;
+    }
+
+    .optional-text {
+        font-size: 12px;
+        color: #9ca3af;
+        font-weight: 400;
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 13px;
+        text-align: center;
+        margin-bottom: 16px;
+    }
+
+    .success-message {
+        color: #16a34a;
+        font-size: 13px;
+        text-align: center;
+        margin-bottom: 16px;
+    }
+</style>
+
+<div class="container">
+    <a href="/StudentProfile" class="back-link">← Back to Profile</a>
+    
+    <h1 class="page-title">Confirm Your Student Status</h1>
+    <p class="page-subtitle">Upload a document showing you're currently enrolled. This confirms you're a real student - separate from confirming you've actually rented a dorm - and unlocks a "Verified Student" badge on your profile.</p>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="error-message">@Model.ErrorMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="success-message">@Model.SuccessMessage</div>
+    }
+
+    <div class="card">
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label class="form-label">SCHOOL / UNIVERSITY</label>
+                <select class="form-select" asp-for="School">
+                    <option value="">Select your school</option>
+                    <option value="Cebu Institute of Technology - University">Cebu Institute of Technology - University</option>
+                    <option value="University of San Carlos">University of San Carlos</option>
+                    <option value="University of Cebu">University of Cebu</option>
+                    <option value="University of the Philippines Cebu">University of the Philippines Cebu</option>
+                    <option value="Cebu Normal University">Cebu Normal University</option>
+                    <option value="Southwestern University">Southwestern University</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">STUDENT ID OR CERTIFICATE OF REGISTRATION (COR)</label>
+                <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+                    <span class="file-upload-icon">📄</span>
+                    <div class="file-upload-text">Upload file (JPG, PNG or PDF, max 10MB)</div>
+                    <div class="file-upload-hint" id="fileName">No file chosen</div>
+                    <input type="file" id="fileInput" name="StudentIdFile" accept=".jpg,.jpeg,.png,.pdf" onchange="updateFileName(this)" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">SCHOOL EMAIL <span class="optional-text">(OPTIONAL, SPEEDS UP REVIEW)</span></label>
+                <input type="email" class="form-input" placeholder="yourname@school.edu.ph" asp-for="SchoolEmail" />
+            </div>
+
+            <button type="submit" asp-page-handler="Submit" class="btn-submit">Submit for Student Verification</button>
+        </form>
+    </div>
+
+    <div class="info-box">
+        <strong>Pending Review</strong> — Reviewed within 1-2 days. This step is optional but recommended - verified students are more trusted by owners and other students.
+    </div>
+
+    <form method="post">
+        <button type="submit" asp-page-handler="Skip" class="btn-skip">Skip for Now, Continue</button>
+    </form>
+</div>
+
+<script>
+    function updateFileName(input) {
+        const fileName = document.getElementById('fileName');
+        if (input.files.length > 0) {
+            fileName.textContent = input.files[0].name;
+        } else {
+            fileName.textContent = 'No file chosen';
+        }
+    }
+</script>
