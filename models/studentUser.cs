@@ -1,0 +1,14 @@
+using MongoDB.Bson.Serialization.Attributes;
+
+[BsonIgnoreExtraElements]
+public class studentUser
+    {
+        [BsonId]
+        public int Id { get; set; }
+
+        [BsonElement("first_Name")]
+        public string FirstName { get; set; }
+
+        [BsonElement("last_Name")]
+        public string LastName { get; set; }
+    }
