@@ -3,6 +3,7 @@ using MongoDB.Driver;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
+builder.Services.AddSingleton<MongoDBService>();
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -22,7 +23,7 @@ try
     if (student != null)
     {
         Console.WriteLine("Connected to MongoDB! yay");
-        Console.WriteLine($"Student: {student.FirstName} {student.LastName}");
+        Console.WriteLine($"Student: {student.FirstName} {student.LastName} {student.Email} {student.Phone} {student.DateJoined}");
     }
     else
     {
