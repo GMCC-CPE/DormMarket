@@ -9,6 +9,15 @@ namespace GMCC.Pages
         public string Availability { get; set; } = "Available";
     }
 
+    public class DormReview
+    {
+        public string ReviewerName { get; set; } = string.Empty;
+        public int Rating { get; set; }
+        public string Text { get; set; } = string.Empty;
+        public bool VerifiedRenter { get; set; }
+        public string DatePosted { get; set; } = string.Empty;
+    }
+
     public class Dormitory
     {
         public string Id { get; set; } = string.Empty;
@@ -21,6 +30,7 @@ namespace GMCC.Pages
         public string OwnerContactNumber { get; set; } = string.Empty;
         public string MessengerLink { get; set; } = string.Empty;
         public string OtherContactLink { get; set; } = string.Empty;
+        public List<DormReview> Reviews { get; set; } = new();
     }
 
     // TODO: replace with real data from the database
@@ -43,6 +53,10 @@ namespace GMCC.Pages
                 {
                     new RoomTypeRow { RoomType = "Shared (4 pax)", Price = "P 3,500", Availability = "Available" },
                     new RoomTypeRow { RoomType = "Solo Room", Price = "P 5,800", Availability = "Available" },
+                },
+                Reviews = new List<DormReview>
+                {
+                    new DormReview { ReviewerName = "Anna R.", Rating = 5, Text = "Super close to CIT-U and the owner responds fast. Curfew is strict but the place feels safe.", VerifiedRenter = true, DatePosted = "Jun 2026" },
                 },
             },
             new Dormitory

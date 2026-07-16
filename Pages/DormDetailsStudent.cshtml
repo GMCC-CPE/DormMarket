@@ -203,6 +203,73 @@
             font-size: 13px;
             color: #9ca3af;
         }
+
+        .reviews-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .btn-write-review {
+            background: #0f766e;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .review-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+        }
+
+        .review-top {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .review-stars {
+            color: #f59e0b;
+            font-size: 14px;
+        }
+
+        .review-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .review-verified {
+            background: #99f6e4;
+            color: #0f766e;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+        }
+
+        .review-date {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-left: auto;
+        }
+
+        .review-text {
+            font-size: 13px;
+            color: #374151;
+            line-height: 1.5;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -255,8 +322,33 @@
         <p class="section-title">Description</p>
         <p class="description-text">@Model.Dorm.Description</p>
 
-        <p class="section-title">Reviews</p>
-        <p class="no-reviews">No reviews yet.</p>
+        <div class="reviews-header">
+            <p class="section-title">Reviews</p>
+            <a asp-page="/ReviewDormStudent" asp-route-id="@Model.Dorm.Id" class="btn-write-review">Write a Review</a>
+        </div>
+
+        @if (Model.Dorm.Reviews.Count == 0)
+        {
+            <p class="no-reviews">No reviews yet.</p>
+        }
+        else
+        {
+            @foreach (var review in Model.Dorm.Reviews)
+            {
+                <div class="review-card">
+                    <div class="review-top">
+                        <span class="review-stars">@(new string('★', review.Rating))@(new string('☆', 5 - review.Rating))</span>
+                        <span class="review-name">@review.ReviewerName</span>
+                        @if (review.VerifiedRenter)
+                        {
+                            <span class="review-verified">Verified Renter</span>
+                        }
+                        <span class="review-date">@review.DatePosted</span>
+                    </div>
+                    <p class="review-text">@review.Text</p>
+                </div>
+            }
+        }
     </div>
 </body>
 </html>

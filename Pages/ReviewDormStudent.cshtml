@@ -1,0 +1,223 @@
+@page "{id}"
+@model GMCC.Pages.ReviewDormStudent
+@{
+    ViewData["Title"] = $"Review {Model.Dorm.Name}";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - DormMarket</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #f9fafb;
+            margin: 0;
+            color: #1f2937;
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 14px 32px;
+        }
+
+        .navbar-brand {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1f2937;
+        }
+
+        .navbar-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+
+        .navbar-links a {
+            text-decoration: none;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .avatar-circle {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #d1d5db;
+        }
+
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 28px 32px 60px;
+        }
+
+        .page-title {
+            font-size: 18px;
+            font-weight: 800;
+            margin: 0 0 8px;
+        }
+
+        .page-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .field-label {
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+            color: #374151;
+            margin: 0 0 8px;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 2px;
+            margin-bottom: 24px;
+        }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            font-size: 30px;
+            line-height: 1;
+            color: #d1d5db;
+            cursor: pointer;
+        }
+
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #f59e0b;
+        }
+
+        .review-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #fff;
+            resize: vertical;
+            margin-bottom: 24px;
+        }
+
+        .upload-box {
+            border: 1.5px dashed #d1d5db;
+            border-radius: 10px;
+            background: #f3f4f6;
+            padding: 28px 16px;
+            text-align: center;
+            font-size: 13px;
+            color: #9ca3af;
+            cursor: pointer;
+            margin-bottom: 24px;
+        }
+
+        .verified-badge {
+            display: inline-block;
+            background: #99f6e4;
+            color: #0f766e;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 999px;
+            margin-bottom: 24px;
+        }
+
+        .btn-post {
+            background: #0f766e;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 22px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <span class="navbar-brand">DormMarket</span>
+        <div class="navbar-links">
+            <a asp-page="/BrowseDormStudent">Browse</a>
+            <a asp-page="/ProfileStudent">Profile</a>
+        </div>
+        <div class="avatar-circle"></div>
+    </nav>
+
+    <div class="container">
+        <h1 class="page-title">Review @Model.Dorm.Name</h1>
+        <p class="page-subtitle">Show your experience to help other students. Verified renter's review are marked with a badge.</p>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="error-message">@Model.ErrorMessage</div>
+        }
+
+        <form method="post">
+            <input type="hidden" asp-for="Id" />
+
+            <p class="field-label">YOUR RATING</p>
+            <div class="star-rating">
+                <input type="radio" id="star5" name="Rating" value="5" checked="@(Model.Rating == 5 ? "checked" : null)" /><label for="star5">&#9733;</label>
+                <input type="radio" id="star4" name="Rating" value="4" checked="@(Model.Rating == 4 ? "checked" : null)" /><label for="star4">&#9733;</label>
+                <input type="radio" id="star3" name="Rating" value="3" checked="@(Model.Rating == 3 ? "checked" : null)" /><label for="star3">&#9733;</label>
+                <input type="radio" id="star2" name="Rating" value="2" checked="@(Model.Rating == 2 ? "checked" : null)" /><label for="star2">&#9733;</label>
+                <input type="radio" id="star1" name="Rating" value="1" checked="@(Model.Rating == 1 ? "checked" : null)" /><label for="star1">&#9733;</label>
+            </div>
+
+            <p class="field-label">YOUR REVIEW</p>
+            <textarea name="ReviewText" class="review-textarea" placeholder="Write about your stay: room condition, owner responsiveness, safety, curfew, etc.">@Model.ReviewText</textarea>
+
+            <p class="field-label">ADD A PHOTO (OPTIONAL)</p>
+            <div class="upload-box" onclick="document.getElementById('reviewPhotoInput').click();">
+                &#8593; Upload a photo of your room or the dorm
+            </div>
+            <input type="file" id="reviewPhotoInput" accept="image/*" hidden />
+
+            <p class="field-label">ATTACH PROOF OF STAY (OPTIONAL, SPEEDS UP VERIFICATION)</p>
+            <div class="upload-box" onclick="document.getElementById('proofOfStayInput').click();">
+                &#8593; Upload contract, receipt or dorm ID
+            </div>
+            <input type="file" id="proofOfStayInput" accept=".pdf,image/*" hidden />
+
+            @if (Model.IsVerifiedRenter)
+            {
+                <div><span class="verified-badge">Verified Renter</span></div>
+            }
+
+            <div>
+                <button type="submit" asp-page-handler="Submit" class="btn-post">Post Review</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
