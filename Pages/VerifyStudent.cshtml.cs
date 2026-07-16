@@ -71,7 +71,6 @@ namespace GMCC.Pages
                 return Page();
             }
 
-            // Optional email sanity check
             if (!string.IsNullOrWhiteSpace(SchoolEmail) && !SchoolEmail.Contains('@'))
             {
                 ErrorMessage = "Please enter a valid school email, or leave it blank.";
@@ -117,7 +116,7 @@ namespace GMCC.Pages
                 Status = VerificationStatus.Approved, 
                 SubmittedAtUtc = DateTime.UtcNow,
                 UserId = User.Identity?.Name
-            };
+            };// put this in database
 
             return RedirectToPage("/RenterVerify", new { studentVerification = "approved" });
         }
