@@ -16,6 +16,9 @@ namespace GMCC.Pages
 
     public class DashboardOwner : PageModel
     {
+        [TempData]
+        public string? ListingStatus { get; set; }
+
         public List<DashboardListing> Listings { get; set; } = new();
 
         public int ActiveListingsCount => Listings.Count;
