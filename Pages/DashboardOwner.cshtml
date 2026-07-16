@@ -187,6 +187,7 @@
             font-weight: 600;
             cursor: pointer;
             padding: 0;
+            text-decoration: none;
         }
     </style>
 </head>
@@ -198,7 +199,6 @@
         </div>
         <div class="navbar-links">
             <a asp-page="/DashboardOwner" class="active">Dashboard</a>
-            <a asp-page="/BrowseDormOwner">Listings</a>
             <a asp-page="/ProfileOwner">Profile</a>
         </div>
         <div class="navbar-right">
@@ -233,7 +233,7 @@
                     <div class="listing-thumb"></div>
                     <div class="listing-footer">
                         <span class="status-pill @(listing.Status == "Vacant" ? "status-vacant" : "status-occupied")">@listing.Status</span>
-                        <button type="button" class="manage-link">Manage</button>
+                        <a asp-page="/ManageDormOwner" asp-route-id="@listing.Id" class="manage-link">Manage</a>
                     </div>
                 </div>
             }

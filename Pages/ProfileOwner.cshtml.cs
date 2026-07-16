@@ -18,9 +18,5 @@ namespace GMCC.Pages
         {
             return RedirectToPage("/DashboardOwner");
         }
-         public IActionResult OnPostListing()
-        {
-            return RedirectToPage("/BrowseDormOwner");
-        }
     }
 }
