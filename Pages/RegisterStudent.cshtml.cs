@@ -58,7 +58,7 @@ namespace GMCC.Pages
             });
 
             SuccessMessage = "Account created successfully.";
-            return RedirectToPage("/LoginStudent");
+            return RedirectToPage("/VerifyStudent");
         }
 
         public IActionResult OnPostLogin()
