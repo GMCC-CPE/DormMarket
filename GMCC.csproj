@@ -10,4 +10,10 @@
     <PackageReference Include="MongoDB.Driver" Version="3.10.0" />
   </ItemGroup>
 
+<ItemGroup>
+    <None Update="tessdata\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
