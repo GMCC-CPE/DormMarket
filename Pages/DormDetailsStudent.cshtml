@@ -1,0 +1,258 @@
+@page "{id}"
+@model GMCC.Pages.DormDetailsStudent
+@{
+    ViewData["Title"] = "Dorm Details";
+    Layout = null;
+
+    var startingPrice = Model.PrimaryRoom != null ? Model.PrimaryRoom.Price.Replace("P ", "₱") : "";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.Dorm.Name - DormMarket</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #f9fafb;
+            margin: 0;
+            color: #1f2937;
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 14px 32px;
+        }
+
+        .navbar-brand {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1f2937;
+        }
+
+        .navbar-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+
+        .navbar-links a {
+            text-decoration: none;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .navbar-links a.active {
+            color: #1f2937;
+            font-weight: 700;
+        }
+
+        .avatar-circle {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #d1d5db;
+        }
+
+        .container {
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 24px 32px 60px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .main-photo {
+            height: 260px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .thumb-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .thumb {
+            height: 70px;
+            background: #e5e7eb;
+            border-radius: 8px;
+        }
+
+        .info-card {
+            background: #ecfdf5;
+            border: 1px solid #d1fae5;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .price {
+            font-size: 22px;
+            font-weight: 800;
+            color: #047857;
+        }
+
+        .price span {
+            font-size: 13px;
+            font-weight: 600;
+            color: #059669;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 16px;
+            font-size: 13px;
+        }
+
+        .info-label {
+            color: #6b7280;
+        }
+
+        .info-value {
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .pill-avail {
+            background: #d1fae5;
+            color: #047857;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 999px;
+        }
+
+        .btn-message {
+            width: 100%;
+            background: #0f766e;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 0;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .dorm-name {
+            font-size: 20px;
+            font-weight: 800;
+            margin: 0 0 4px;
+        }
+
+        .dorm-location {
+            font-size: 13px;
+            color: #dc2626;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 800;
+            margin: 0 0 12px;
+        }
+
+        .amenities-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .amenity-pill {
+            background: #d1fae5;
+            color: #047857;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 999px;
+        }
+
+        .description-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #374151;
+            margin-bottom: 24px;
+        }
+
+        .no-reviews {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <span class="navbar-brand">DormMarket</span>
+        <div class="navbar-links">
+            <a asp-page="/BrowseDormStudent" class="active">Browse</a>
+            <a asp-page="/ProfileStudent">Profile</a>
+        </div>
+        <div class="avatar-circle"></div>
+    </nav>
+
+    <div class="container">
+        <div class="detail-grid">
+            <div>
+                <div class="main-photo"></div>
+                <div class="thumb-row">
+                    <div class="thumb"></div>
+                    <div class="thumb"></div>
+                    <div class="thumb"></div>
+                    <div class="thumb"></div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="price">@startingPrice<span>/month</span></div>
+                <div class="info-row">
+                    <span class="info-label">Room Type</span>
+                    <span class="info-value">@(Model.PrimaryRoom?.RoomType)</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Availability</span>
+                    <span class="pill-avail">@Model.Dorm.Status</span>
+                </div>
+                <button type="button" class="btn-message">Message Owner</button>
+            </div>
+        </div>
+
+        <h1 class="dorm-name">@Model.Dorm.Name</h1>
+        <div class="dorm-location">&#128205; @Model.Dorm.Location</div>
+
+        <p class="section-title">Amenities</p>
+        <div class="amenities-grid">
+            @foreach (var amenity in Model.Dorm.Amenities)
+            {
+                <span class="amenity-pill">&#10003; @amenity</span>
+            }
+        </div>
+
+        <p class="section-title">Description</p>
+        <p class="description-text">@Model.Dorm.Description</p>
+
+        <p class="section-title">Reviews</p>
+        <p class="no-reviews">No reviews yet.</p>
+    </div>
+</body>
+</html>

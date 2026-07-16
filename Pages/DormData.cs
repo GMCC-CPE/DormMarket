@@ -14,6 +14,9 @@ namespace GMCC.Pages
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Status { get; set; } = "Vacant";
+        public string Location { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public List<string> Amenities { get; set; } = new();
         public List<RoomTypeRow> Rooms { get; set; } = new();
     }
 
@@ -27,6 +30,9 @@ namespace GMCC.Pages
                 Id = "casa-verde",
                 Name = "Casa-Verde Dormitory",
                 Status = "Vacant",
+                Location = "Near Cebu Institute of Technology-University (CIT-U)",
+                Description = "Cozy, secure dormitory just a 5-minute walk from Cebu Institute of Technology - U. Rooms are shared (4 pax) with own CR, aircon, and free WiFi. CCTV-monitored premises, 10PM curfew, and on-site parking available. Perfect for students who want a safe, budget-friendly place close to campus.",
+                Amenities = new List<string> { "WiFi", "Aircon", "CCTV", "Own CR", "Curfew: 10 PM", "Parking" },
                 Rooms = new List<RoomTypeRow>
                 {
                     new RoomTypeRow { RoomType = "Shared (4 pax)", Price = "P 3,500", Availability = "Available" },
@@ -38,6 +44,9 @@ namespace GMCC.Pages
                 Id = "blue-haven",
                 Name = "Blue Haven Residence",
                 Status = "Vacant",
+                Location = "Near University of San Carlos (USC)",
+                Description = "A quiet residence a short jeepney ride from USC. Shared rooms come with a common CR, while solo rooms have aircon. Laundry area and free WiFi included. No curfew, so it suits students with irregular class schedules.",
+                Amenities = new List<string> { "WiFi", "Laundry", "Aircon", "Shared CR", "No Curfew" },
                 Rooms = new List<RoomTypeRow>
                 {
                     new RoomTypeRow { RoomType = "Shared (4 pax)", Price = "P 3,200", Availability = "Full" },
@@ -49,6 +58,9 @@ namespace GMCC.Pages
                 Id = "sunset-suites",
                 Name = "Sunset Suites",
                 Status = "Vacant",
+                Location = "Near University of San Jose-Recoletos (USJR)",
+                Description = "Budget-friendly bedspace and solo rooms near USJR. Basic amenities with 24/7 security and a shared kitchen. A great pick for students looking to save on rent without sacrificing safety.",
+                Amenities = new List<string> { "WiFi", "Kitchen", "CCTV", "Shared CR" },
                 Rooms = new List<RoomTypeRow>
                 {
                     new RoomTypeRow { RoomType = "Bedspace", Price = "P 2,000", Availability = "Available" },
@@ -60,6 +72,9 @@ namespace GMCC.Pages
                 Id = "green-court",
                 Name = "Green Court Dorm",
                 Status = "Vacant",
+                Location = "Near University of Cebu (UC)",
+                Description = "Spacious shared and bedspace rooms with a garden common area. Own CR available per unit, plus on-site parking for students with motorbikes. Strict 10PM curfew for a study-friendly environment.",
+                Amenities = new List<string> { "WiFi", "Own CR", "Parking", "Curfew: 10 PM" },
                 Rooms = new List<RoomTypeRow>
                 {
                     new RoomTypeRow { RoomType = "Shared (4 pax)", Price = "P 3,000", Availability = "Available" },

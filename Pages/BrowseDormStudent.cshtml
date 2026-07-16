@@ -167,10 +167,20 @@
         }
 
         .dorm-card {
+            display: block;
             border: 1px solid #e5e7eb;
             border-radius: 10px;
             overflow: hidden;
             background: #fff;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .dorm-price {
+            font-size: 12px;
+            font-weight: 700;
+            color: #0f766e;
+            margin-top: 4px;
         }
 
         .dorm-thumb {
@@ -279,13 +289,18 @@
                 <div class="results-grid">
                     @foreach (var dorm in Model.Results)
                     {
-                        <div class="dorm-card">
+                        var startingPrice = dorm.Rooms.Count > 0 ? dorm.Rooms[0].Price.Replace("P ", "₱") : "";
+                        <a asp-page="/DormDetailsStudent" asp-route-id="@dorm.Id" class="dorm-card">
                             <div class="dorm-thumb"></div>
                             <div class="dorm-info">
                                 <div class="dorm-name">@dorm.Name</div>
                                 <div class="dorm-location">@dorm.Location</div>
+                                @if (!string.IsNullOrEmpty(startingPrice))
+                                {
+                                    <div class="dorm-price">@startingPrice/mo</div>
+                                }
                             </div>
-                        </div>
+                        </a>
                     }
                 </div>
             </div>
