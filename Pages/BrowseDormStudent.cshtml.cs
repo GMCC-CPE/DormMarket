@@ -8,16 +8,19 @@ using Microsoft.Extensions.Logging;
 
 namespace GMCC.Pages
 {
-    public class BrowseDormStudent : PageModel
+    public class BrowseDormOwner : PageModel
     {
-
 
         public void OnGet()
         {
         }
-        public IActionResult OnPostProfile()
+         public IActionResult OnPostDashboard()
         {
-            return RedirectToPage("/ProfileStudent");
+            return RedirectToPage("/DashboardOwner");
+        }
+         public IActionResult OnPostProfile()
+        {
+            return RedirectToPage("/ProfileOwner");
         }
     }
 }
