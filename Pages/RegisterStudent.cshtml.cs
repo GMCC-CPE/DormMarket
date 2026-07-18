@@ -1,14 +1,21 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using MongoDB.Driver;
 
 namespace GMCC.Pages
 {
     public class RegisterStudent : PageModel
     {
+        private readonly MongoDBService _mongoService;
+
+        public RegisterStudent(MongoDBService mongoService)
+        {
+            _mongoService = mongoService;
+        }
+
         [BindProperty]
         public string FullName { get; set; }
 
@@ -43,22 +50,42 @@ namespace GMCC.Pages
                 return Page();
             }
 
-            if (Students.EmailExists(Email))
+            var existing = _mongoService.Students
+                .Find(s => s.Email == Email)
+                .FirstOrDefault();
+
+            if (existing != null)
             {
                 ErrorMessage = "An account with this email already exists.";
                 return Page();
             }
 
-            Students.Add(new StudentAccount
+            var nameParts = FullName.Trim().Split(' ', 2);
+            var firstName = nameParts[0];
+            var lastName = nameParts.Length > 1 ? nameParts[1] : "";
+
+            var maxId = _mongoService.Students
+                .Find(FilterDefinition<studentUser>.Empty)
+                .SortByDescending(s => s.Id)
+                .Limit(1)
+                .FirstOrDefault();
+            var nextId = (maxId?.Id ?? 0) + 1;
+
+            var newStudent = new studentUser
             {
-                FullName = FullName,
+                Id = nextId,
+                FirstName = firstName,
+                LastName = lastName,
                 Email = Email,
-                ContactNumber = ContactNumber,
-                Password = Password
-            });
+                Password = Password,
+                Phone = ContactNumber,
+                DateJoined = DateTime.UtcNow
+            };
+
+            _mongoService.Students.InsertOne(newStudent);
 
             SuccessMessage = "Account created successfully.";
-            return RedirectToPage("/VerifyStudent");
+            return RedirectToPage("/VerifyStudent", new { studentId = nextId });
         }
 
         public IActionResult OnPostLogin()
@@ -78,26 +105,5 @@ namespace GMCC.Pages
                 return false;
             }
         }
-    }
-
-    public static class Students
-    {
-        private static readonly List<StudentAccount> _students = new();
-
-        public static bool EmailExists(string email) =>
-            _students.Any(s => s.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
-
-        public static void Add(StudentAccount student) => _students.Add(student);
-
-        public static StudentAccount? FindByEmail(string email) =>
-            _students.FirstOrDefault(s => s.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
-    }
-
-    public class StudentAccount
-    {
-        public string FullName { get; set; } = "";
-        public string Email { get; set; } = "";
-        public string ContactNumber { get; set; } = "";
-        public string Password { get; set; } = "";
     }
 }
