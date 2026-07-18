@@ -18,7 +18,7 @@ namespace GMCC.Pages
 
         private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".pdf" };
         private static readonly string[] AllowedContentTypes = { "image/jpeg", "image/png", "application/pdf" };
-        private const long MaxFileSizeBytes = 10 * 1024 * 1024; // 10 MB limit
+        private const long MaxFileSizeBytes = 10 * 1024 * 1024; 
 
         public RenterVerify(IWebHostEnvironment env, ILogger<RenterVerify> logger)
         {
@@ -26,7 +26,6 @@ namespace GMCC.Pages
             _logger = logger;
         }
 
-        // 1. Properties bound to your HTML elements (asp-for match)
         [BindProperty]
         public string Dormitory { get; set; } = string.Empty;
 
@@ -46,17 +45,13 @@ namespace GMCC.Pages
         {
         }
 
-        // Handles button: asp-page-handler="NeverRented"
         public IActionResult OnPostNeverRented()
         {
-            // Proceed to login if user picks "Never Rented Before"
             return RedirectToPage("/LoginStudent");
         }
 
-        // Handles button: asp-page-handler="SubmitProof"
         public async Task<IActionResult> OnPostSubmitProof()
         {
-            // 1. Basic Form Validations
             if (string.IsNullOrWhiteSpace(Dormitory))
             {
                 ErrorMessage = "Please select or type the name of the dormitory you rented.";
@@ -82,7 +77,6 @@ namespace GMCC.Pages
                 return Page();
             }
 
-            // 2. Read Image into Memory Bytes
             byte[] imageBytes;
             using (var memoryStream = new MemoryStream())
             {
@@ -90,7 +84,6 @@ namespace GMCC.Pages
                 imageBytes = memoryStream.ToArray();
             }
 
-            // 3. Run OCR Scan matching the selected Dormitory and Student's Name
             var ocrResult = VerifyProofOfStayDocument(imageBytes, Dormitory);
             if (!ocrResult.IsSuccess)
             {
@@ -98,7 +91,6 @@ namespace GMCC.Pages
                 return Page();
             }
 
-            // 4. Save file securely to Server Storage
             var storageFolder = Path.Combine(_env.ContentRootPath, "App_Data", "RenterVerifications");
             Directory.CreateDirectory(storageFolder);
 
@@ -116,10 +108,6 @@ namespace GMCC.Pages
                 return Page();
             }
 
-            // TODO: Update your database status here
-            // e.g. User.IsRenterVerified = true;
-
-            // 5. Success! Redirect
             return RedirectToPage("/LoginStudent", new { renterVerification = "approved" });
         }
 
@@ -142,23 +130,19 @@ namespace GMCC.Pages
                 string extractedText = page.GetText();
                 float confidence = page.GetMeanConfidence();
 
-                // Validation A: Ensure image isn't too blurry
                 if (confidence < 0.55f)
                 {
                     return (false, "The uploaded document is too blurry. Please upload a clearer image.");
                 }
 
-                // Standardize casing and spaces for comparisons
                 string normalizedExtracted = extractedText.Replace(" ", "").ToLowerInvariant();
                 string normalizedDorm = expectedDorm.Replace(" ", "").ToLowerInvariant();
 
-                // Validation B: Check if selected Dorm name appears on document text
                 if (!normalizedExtracted.Contains(normalizedDorm))
                 {
                     return (false, $"Verification failed. We couldn't find your selected dormitory '{expectedDorm}' mentioned on this document.");
                 }
 
-                // Validation C: Verify document belongs to the logged-in student's name
                 string registeredName = User.Identity?.Name ?? "";
                 if (!string.IsNullOrEmpty(registeredName))
                 {
