@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -12,87 +11,95 @@ using Tesseract;
 
 namespace GMCC.Pages
 {
-    public class VerifyStudent : PageModel
+    public class RenterVerify : PageModel
     {
         private readonly IWebHostEnvironment _env;
-        private readonly ILogger<VerifyStudent> _logger;
+        private readonly ILogger<RenterVerify> _logger;
 
-        private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png" };
-        private static readonly string[] AllowedContentTypes = { "image/jpeg", "image/png" };
-        private const long MaxFileSizeBytes = 10 * 1024 * 1024;
+        private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".pdf" };
+        private static readonly string[] AllowedContentTypes = { "image/jpeg", "image/png", "application/pdf" };
+        private const long MaxFileSizeBytes = 10 * 1024 * 1024; // 10 MB limit
 
-        public VerifyStudent(IWebHostEnvironment env, ILogger<VerifyStudent> logger)
+        public RenterVerify(IWebHostEnvironment env, ILogger<RenterVerify> logger)
         {
             _env = env;
             _logger = logger;
         }
 
+        // 1. Properties bound to your HTML elements (asp-for match)
         [BindProperty]
-        public string School { get; set; } = string.Empty;
+        public string Dormitory { get; set; } = string.Empty;
 
         [BindProperty]
-        public string? SchoolEmail { get; set; }
+        public DateTime? MoveInDate { get; set; }
 
         [BindProperty]
-        public IFormFile? StudentIdFile { get; set; }
+        public DateTime? MoveOutDate { get; set; }
+
+        [BindProperty]
+        public IFormFile? ProofFile { get; set; }
 
         public string? ErrorMessage { get; set; }
         public string? SuccessMessage { get; set; }
-        public bool IsPendingReview { get; set; }
 
         public void OnGet()
         {
         }
 
-        public async Task<IActionResult> OnPostSubmit()
+        // Handles button: asp-page-handler="NeverRented"
+        public IActionResult OnPostNeverRented()
         {
-            if (string.IsNullOrWhiteSpace(School))
+            // Proceed to login if user picks "Never Rented Before"
+            return RedirectToPage("/LoginStudent");
+        }
+
+        // Handles button: asp-page-handler="SubmitProof"
+        public async Task<IActionResult> OnPostSubmitProof()
+        {
+            // 1. Basic Form Validations
+            if (string.IsNullOrWhiteSpace(Dormitory))
             {
-                ErrorMessage = "Please enter your school/university name.";
+                ErrorMessage = "Please select or type the name of the dormitory you rented.";
                 return Page();
             }
 
-            if (StudentIdFile == null || StudentIdFile.Length == 0)
+            if (ProofFile == null || ProofFile.Length == 0)
             {
-                ErrorMessage = "Please upload your student ID.";
+                ErrorMessage = "Please upload an image of your Proof of Stay.";
                 return Page();
             }
 
-            if (StudentIdFile.Length > MaxFileSizeBytes)
+            if (ProofFile.Length > MaxFileSizeBytes)
             {
                 ErrorMessage = "File is too large. Max size is 10 MB.";
                 return Page();
             }
 
-            var ext = Path.GetExtension(StudentIdFile.FileName).ToLowerInvariant();
-            if (!AllowedExtensions.Contains(ext) || !AllowedContentTypes.Contains(StudentIdFile.ContentType))
+            var ext = Path.GetExtension(ProofFile.FileName).ToLowerInvariant();
+            if (!AllowedExtensions.Contains(ext) || !AllowedContentTypes.Contains(ProofFile.ContentType))
             {
-                ErrorMessage = "Invalid file type. Please upload a JPG or PNG image.";
+                ErrorMessage = "Invalid file type. Please upload a JPG, PNG, or PDF.";
                 return Page();
             }
 
-            // Optional email sanity check
-            if (!string.IsNullOrWhiteSpace(SchoolEmail) && !SchoolEmail.Contains('@'))
-            {
-                ErrorMessage = "Please enter a valid school email, or leave it blank.";
-                return Page();
-            }
-
+            // 2. Read Image into Memory Bytes
             byte[] imageBytes;
             using (var memoryStream = new MemoryStream())
             {
-                await StudentIdFile.CopyToAsync(memoryStream);
+                await ProofFile.CopyToAsync(memoryStream);
                 imageBytes = memoryStream.ToArray();
             }
 
-            var ocrResult = RunLocalOcrScan(imageBytes, School);
+            // 3. Run OCR Scan matching the selected Dormitory and Student's Name
+            var ocrResult = VerifyProofOfStayDocument(imageBytes, Dormitory);
             if (!ocrResult.IsSuccess)
             {
                 ErrorMessage = ocrResult.Message;
                 return Page();
             }
 
-            var storageFolder = Path.Combine(_env.ContentRootPath, "App_Data", "StudentVerifications");
+            // 4. Save file securely to Server Storage
+            var storageFolder = Path.Combine(_env.ContentRootPath, "App_Data", "RenterVerifications");
             Directory.CreateDirectory(storageFolder);
 
             var storedFileName = $"{Guid.NewGuid()}{ext}";
@@ -104,25 +111,19 @@ namespace GMCC.Pages
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to save student verification file.");
+                _logger.LogError(ex, "Failed to save verification file.");
                 ErrorMessage = "Something went wrong saving your file. Please try again.";
                 return Page();
             }
 
-            var verification = new StudentVerificationRequest
-            {
-                School = School,
-                SchoolEmail = SchoolEmail,
-                StoredFileName = storedFileName,
-                Status = VerificationStatus.Approved, 
-                SubmittedAtUtc = DateTime.UtcNow,
-                UserId = User.Identity?.Name
-            };// put this in database
+            // TODO: Update your database status here
+            // e.g. User.IsRenterVerified = true;
 
-            return RedirectToPage("/RenterVerify", new { studentVerification = "approved" });
+            // 5. Success! Redirect
+            return RedirectToPage("/LoginStudent", new { renterVerification = "approved" });
         }
 
-        private (bool IsSuccess, string Message) RunLocalOcrScan(byte[] imageBytes, string userInputSchool)
+        private (bool IsSuccess, string Message) VerifyProofOfStayDocument(byte[] imageBytes, string expectedDorm)
         {
             string tessdataPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tessdata");
 
@@ -141,37 +142,30 @@ namespace GMCC.Pages
                 string extractedText = page.GetText();
                 float confidence = page.GetMeanConfidence();
 
+                // Validation A: Ensure image isn't too blurry
                 if (confidence < 0.55f)
                 {
-                    return (false, "The uploaded image is too blurry. Please try again with a clearer, brighter photo.");
+                    return (false, "The uploaded document is too blurry. Please upload a clearer image.");
                 }
 
+                // Standardize casing and spaces for comparisons
                 string normalizedExtracted = extractedText.Replace(" ", "").ToLowerInvariant();
+                string normalizedDorm = expectedDorm.Replace(" ", "").ToLowerInvariant();
 
-                string[] inputWords = userInputSchool.ToLowerInvariant()
-                    .Split(new[] { ' ', '-', ',', '.' }, StringSplitOptions.RemoveEmptyEntries);
-
-                int matchCount = inputWords.Count(word => normalizedExtracted.Contains(word));
-
-                if (matchCount < 2)
+                // Validation B: Check if selected Dorm name appears on document text
+                if (!normalizedExtracted.Contains(normalizedDorm))
                 {
-                    return (false, $"Verification failed. We couldn't match '{userInputSchool}' with the text read on this ID card.");
+                    return (false, $"Verification failed. We couldn't find your selected dormitory '{expectedDorm}' mentioned on this document.");
                 }
 
-                var idMatch = Regex.Match(extractedText, @"\b\d{2}-\d{4}-\d{3}\b");
-                if (!idMatch.Success)
-                {
-                    return (false, "Verification failed. We could not read a valid Student ID number pattern on your card.");
-                }
-                string detectedIdNumber = idMatch.Value; 
-
-                string registeredName = User.Identity?.Name ?? ""; 
+                // Validation C: Verify document belongs to the logged-in student's name
+                string registeredName = User.Identity?.Name ?? "";
                 if (!string.IsNullOrEmpty(registeredName))
                 {
                     string cleanRegisteredName = registeredName.Replace(" ", "").ToLowerInvariant();
                     if (!normalizedExtracted.Contains(cleanRegisteredName))
                     {
-                        return (false, $"Verification failed. The name on this ID doesn't match your profile name ({registeredName}).");
+                        return (false, $"Verification failed. The name on this document doesn't match your profile name ({registeredName}).");
                     }
                 }
 
@@ -179,32 +173,9 @@ namespace GMCC.Pages
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "OCR Engine Exception occurred.");
-                return (false, "Failed to analyze ID card. Ensure you uploaded a clear, uncorrupted image.");
+                _logger.LogError(ex, "OCR Engine processing exception.");
+                return (false, "Failed to analyze your proof of stay. Make sure it is a valid, uncorrupted image.");
             }
         }
-
-        public IActionResult OnPostSkip()
-        {
-            return RedirectToPage("/RenterVerify", new { studentVerification = "skipped" });
-        }
-    }
-
-    public enum VerificationStatus
-    {
-        PendingReview,
-        Approved,
-        Rejected
-    }
-
-    public class StudentVerificationRequest
-    {
-        public int Id { get; set; }
-        public string School { get; set; } = string.Empty;
-        public string? SchoolEmail { get; set; }
-        public string StoredFileName { get; set; } = string.Empty;
-        public VerificationStatus Status { get; set; }
-        public DateTime SubmittedAtUtc { get; set; }
-        public string? UserId { get; set; }
     }
 }
