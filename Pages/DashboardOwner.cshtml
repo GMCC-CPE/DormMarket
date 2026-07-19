@@ -179,6 +179,11 @@
             color: #b91c1c;
         }
 
+        .status-draft {
+            background: #e5e7eb;
+            color: #4b5563;
+        }
+
         .manage-link {
             background: none;
             border: none;
@@ -229,15 +234,31 @@
         <div class="listings-grid">
             @foreach (var listing in Model.Listings)
             {
+                var statusClass = listing.Status == "Vacant" ? "status-vacant"
+                    : listing.Status == "Occupied" ? "status-occupied"
+                    : "status-draft";
+
                 <div class="listing-card">
-                    <div class="listing-thumb"></div>
+                    @if (!string.IsNullOrEmpty(listing.ThumbnailPath))
+                    {
+                        <div class="listing-thumb" style="background-image:url('@listing.ThumbnailPath');background-size:cover;background-position:center;"></div>
+                    }
+                    else
+                    {
+                        <div class="listing-thumb"></div>
+                    }
                     <div class="listing-footer">
-                        <span class="status-pill @(listing.Status == "Vacant" ? "status-vacant" : "status-occupied")">@listing.Status</span>
-                        <a asp-page="/ManageDormOwner" asp-route-id="@listing.Id" class="manage-link">Manage</a>
+                        <span class="status-pill @statusClass">@listing.Status</span>
+                        <a asp-page="/BrowseDormOwner" asp-route-id="@listing.Id" class="manage-link">Manage</a>
                     </div>
                 </div>
             }
         </div>
+
+        @if (Model.Listings.Count == 0)
+        {
+            <p style="color:#9ca3af;font-size:14px;margin-top:20px;">You haven't added any dormitories yet.</p>
+        }
     </div>
 </body>
 </html>

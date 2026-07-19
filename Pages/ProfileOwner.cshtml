@@ -291,16 +291,31 @@
         {
             <div class="status-banner">@Model.StatusMessage</div>
         }
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="status-banner" style="background:#fee2e2;color:#b91c1c;border-color:#fecaca;">@Model.ErrorMessage</div>
+        }
 
-        <form method="post">
+        <form method="post" enctype="multipart/form-data" id="photoForm" asp-page-handler="ChangePhoto">
             <div class="profile-header">
                 <div class="profile-identity">
-                    <div class="avatar-large"></div>
+                    @if (!string.IsNullOrEmpty(Model.ProfilePhotoPath))
+                    {
+                        <div class="avatar-large" style="background-image:url('@Model.ProfilePhotoPath');background-size:cover;background-position:center;"></div>
+                    }
+                    else
+                    {
+                        <div class="avatar-large"></div>
+                    }
                     <div class="profile-name">@Model.FullName</div>
                 </div>
                 <button type="button" class="btn-change-photo" onclick="document.getElementById('photoInput').click();">Change Photo</button>
-                <input type="file" id="photoInput" accept="image/*" hidden />
+                <input type="file" id="photoInput" name="ProfilePhoto" accept="image/*"
+                       onchange="document.getElementById('photoForm').submit();" hidden />
             </div>
+        </form>
+
+        <form method="post">
 
             <div class="form-grid">
                 <div class="form-group">
@@ -341,8 +356,7 @@
                     </div>
                 }
             </div>
-            <button type="button" class="btn-upload" onclick="document.getElementById('docInput').click();">Upload / Update Documents</button>
-            <input type="file" id="docInput" accept=".pdf,image/*" multiple hidden />
+            <button type="submit" asp-page-handler="UploadDocuments" class="btn-upload">Upload / Update Documents</button>
 
             <p class="section-title">HOW STUDENTS CAN REACH YOU</p>
             <div class="stacked-group">
@@ -356,7 +370,6 @@
 
             <p class="section-title">ACCOUNT SETTINGS</p>
             <div class="stacked-group">
-                <label class="form-label">CHANGE PASSWORD</label>
                 <button type="button" class="change-password-link">Change Password</button>
             </div>
 

@@ -8,19 +8,52 @@ using Microsoft.Extensions.Logging;
 
 namespace GMCC.Pages
 {
-    public class BrowseDormOwner : PageModel
+    public class BrowseDormStudent : PageModel
     {
+        [BindProperty(SupportsGet = true)]
+        public int MaxPrice { get; set; } = 10000;
+
+        [BindProperty(SupportsGet = true)]
+        public List<string> NearSchools { get; set; } = new();
+
+        [BindProperty(SupportsGet = true)]
+        public List<string> RoomTypes { get; set; } = new();
+
+        [BindProperty(SupportsGet = true)]
+        public List<string> Curfew { get; set; } = new();
+
+        [BindProperty(SupportsGet = true)]
+        public List<string> ComfortRoom { get; set; } = new();
+
+        [BindProperty(SupportsGet = true)]
+        public List<string> Wifi { get; set; } = new();
+
+        [BindProperty(SupportsGet = true)]
+        public string Search { get; set; } = string.Empty;
+
+        public List<DormListingItem> Results { get; set; } = new();
 
         public void OnGet()
         {
+            //load all dorm from all owner
         }
-         public IActionResult OnPostDashboard()
+
+        public IActionResult OnPostProfile()
         {
-            return RedirectToPage("/DashboardOwner");
+            return RedirectToPage("/ProfileStudent");
         }
-         public IActionResult OnPostProfile()
-        {
-            return RedirectToPage("/ProfileOwner");
-        }
+    }
+
+    public class DormRoomInfo
+    {
+        public string Price { get; set; } = "";
+    }
+
+    public class DormListingItem
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Location { get; set; } = "";
+        public List<DormRoomInfo> Rooms { get; set; } = new();
     }
 }
