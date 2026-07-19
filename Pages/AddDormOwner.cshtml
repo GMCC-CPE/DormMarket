@@ -173,6 +173,40 @@
             height: 80px;
             background: #e5e7eb;
             border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .photo-add-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: #9ca3af;
+            border: 1.5px dashed #cbd5e1;
+            cursor: pointer;
+            background: #f9fafb;
+        }
+
+        .photo-remove-btn {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #dc2626;
+            color: #fff;
+            font-size: 11px;
+            line-height: 18px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .photo-row {
+            flex-wrap: wrap;
         }
 
         .photo-hint {
@@ -240,7 +274,12 @@
     <div class="container">
         <div class="page-title">Add Dormitory</div>
 
-        <form method="post">
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div style="background:#fee2e2;color:#b91c1c;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:20px;">@Model.ErrorMessage</div>
+        }
+
+        <form method="post" enctype="multipart/form-data">
             <div class="form-grid">
                 <div>
                     <p class="section-title">DORMITORY INFO</p>
@@ -274,12 +313,11 @@
 
                 <div>
                     <p class="section-title">ROOM PHOTOS</p>
-                    <div class="photo-row">
-                        <div class="photo-placeholder"></div>
-                        <div class="photo-placeholder"></div>
-                        <div class="photo-placeholder"></div>
+                    <div class="photo-row" id="photo-preview-row">
+                        <label class="photo-placeholder photo-add-btn" id="photo-add-btn">+</label>
                     </div>
-                    <p class="photo-hint">Upload up to 8 photos</p>
+                    <input type="file" id="photo-input" name="Photos" accept="image/*" multiple style="display:none;" onchange="previewPhotos(this)" />
+                    <p class="photo-hint" id="photo-count-hint">Upload up to 8 photos</p>
 
                     <p class="section-title">AMENITIES</p>
                     <div class="checkbox-grid">
@@ -345,5 +383,64 @@
             </div>
         </form>
     </div>
+
+    <script>
+        let selectedPhotos = [];
+        const MAX_PHOTOS = 8;
+
+        document.getElementById('photo-add-btn').addEventListener('click', function () {
+            document.getElementById('photo-input').click();
+        });
+
+        function previewPhotos(input) {
+            const newFiles = Array.from(input.files || []);
+
+            for (const file of newFiles) {
+                if (selectedPhotos.length >= MAX_PHOTOS) break;
+                selectedPhotos.push(file);
+            }
+
+            syncFileInput();
+            renderPreviews();
+        }
+
+        function removePhoto(index) {
+            selectedPhotos.splice(index, 1);
+            syncFileInput();
+            renderPreviews();
+        }
+
+        function syncFileInput() {
+            const dataTransfer = new DataTransfer();
+            selectedPhotos.forEach(file => dataTransfer.items.add(file));
+            document.getElementById('photo-input').files = dataTransfer.files;
+        }
+
+        function renderPreviews() {
+            const row = document.getElementById('photo-preview-row');
+            const addBtn = document.getElementById('photo-add-btn');
+
+            row.querySelectorAll('.photo-thumb').forEach(el => el.remove());
+
+            selectedPhotos.forEach((file, index) => {
+                const url = URL.createObjectURL(file);
+                const thumb = document.createElement('div');
+                thumb.className = 'photo-placeholder photo-thumb';
+                thumb.style.backgroundImage = `url(${url})`;
+
+                const removeBtn = document.createElement('span');
+                removeBtn.className = 'photo-remove-btn';
+                removeBtn.textContent = '×';
+                removeBtn.onclick = () => removePhoto(index);
+                thumb.appendChild(removeBtn);
+
+                row.insertBefore(thumb, addBtn);
+            });
+
+            addBtn.style.display = selectedPhotos.length >= MAX_PHOTOS ? 'none' : 'flex';
+            document.getElementById('photo-count-hint').textContent =
+                `${selectedPhotos.length}/${MAX_PHOTOS} photos selected`;
+        }
+    </script>
 </body>
 </html>
