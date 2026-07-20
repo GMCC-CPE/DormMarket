@@ -132,7 +132,8 @@ namespace GMCC.Pages
                 var update = Builders<studentUser>.Update
                     .Set(s => s.IdImagePath, relativePath)
                     .Set(s => s.VerificationStatus, "Approved")
-                    .Set(s => s.VerifiedAtUtc, DateTime.UtcNow);
+                    .Set(s => s.VerifiedAtUtc, DateTime.UtcNow)
+                    .Set(s => s.VerifiedSchool, School);
 
                 var result = await _mongoService.Students.UpdateOneAsync(s => s.Id == StudentId, update);
 
@@ -149,7 +150,7 @@ namespace GMCC.Pages
                 return Page();
             }
 
-            return RedirectToPage("/RenterVerify", new { studentVerification = "approved" });
+            return RedirectToPage("/RenterVerify", new { studentVerification = "approved", studentId = StudentId });
         }
 
         private (bool IsSuccess, string Message) RunLocalOcrScan(byte[] imageBytes, string userInputSchool)
@@ -216,7 +217,7 @@ namespace GMCC.Pages
 
         public IActionResult OnPostSkip()
         {
-            return RedirectToPage("/RenterVerify", new { studentVerification = "skipped" });
+            return RedirectToPage("/RenterVerify", new { studentVerification = "skipped", studentId = StudentId });
         }
     }
 }

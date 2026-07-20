@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using Tesseract;
 
 namespace GMCC.Pages
@@ -15,16 +16,21 @@ namespace GMCC.Pages
     {
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<RenterVerify> _logger;
+        private readonly MongoDBService _mongoService;
 
         private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".pdf" };
         private static readonly string[] AllowedContentTypes = { "image/jpeg", "image/png", "application/pdf" };
         private const long MaxFileSizeBytes = 10 * 1024 * 1024; 
 
-        public RenterVerify(IWebHostEnvironment env, ILogger<RenterVerify> logger)
+        public RenterVerify(IWebHostEnvironment env, ILogger<RenterVerify> logger, MongoDBService mongoService)
         {
             _env = env;
             _logger = logger;
+            _mongoService = mongoService;
         }
+
+        [BindProperty(SupportsGet = true)]
+        public int StudentId { get; set; }
 
         [BindProperty]
         public string Dormitory { get; set; } = string.Empty;
@@ -106,6 +112,18 @@ namespace GMCC.Pages
                 _logger.LogError(ex, "Failed to save verification file.");
                 ErrorMessage = "Something went wrong saving your file. Please try again.";
                 return Page();
+            }
+
+            if (StudentId > 0)
+            {
+                var entry = new rentalVerificationEntry
+                {
+                    DormitoryName = Dormitory,
+                    VerifiedAtUtc = DateTime.UtcNow
+                };
+
+                var update = Builders<studentUser>.Update.Push(s => s.RentalVerifications, entry);
+                await _mongoService.Students.UpdateOneAsync(s => s.Id == StudentId, update);
             }
 
             return RedirectToPage("/LoginStudent", new { renterVerification = "approved" });

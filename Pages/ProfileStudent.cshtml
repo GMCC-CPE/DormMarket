@@ -226,29 +226,18 @@
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
-            margin-bottom: 28px;
         }
 
-        .stacked-group {
-            margin-bottom: 18px;
-        }
-
-        .change-password-link {
-            width: 100%;
-            text-align: left;
-            background: #f3f4f6;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 12px;
-            color: #6b7280;
-            font-size: 13px;
-            cursor: pointer;
+        .upload-form {
+            margin-bottom: 24px;
         }
 
         .action-row {
             display: flex;
-            gap: 12px;
+            align-items: center;
+            gap: 16px; /* Space between Save Changes & Log Out */
             margin-top: 8px;
+            margin-bottom: 36px; /* Space above Account Settings */
         }
 
         .btn-save {
@@ -272,6 +261,22 @@
             font-weight: 700;
             cursor: pointer;
         }
+
+        .stacked-group {
+            margin-bottom: 18px;
+        }
+
+        .change-password-link {
+            width: 100%;
+            text-align: left;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            color: #6b7280;
+            font-size: 13px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -289,20 +294,41 @@
         {
             <div class="status-banner">@Model.StatusMessage</div>
         }
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="status-banner" style="background:#fee2e2;color:#b91c1c;border-color:#fecaca;">@Model.ErrorMessage</div>
+        }
 
-        <form method="post">
+        <form method="post" enctype="multipart/form-data" id="photoForm" asp-page-handler="ChangePhoto">
             <div class="profile-header">
                 <div class="profile-identity">
-                    <div class="avatar-large"></div>
+                    @if (!string.IsNullOrEmpty(Model.ProfilePhotoPath))
+                    {
+                        <div class="avatar-large" style="background-image:url('@Model.ProfilePhotoPath');background-size:cover;background-position:center;"></div>
+                    }
+                    else
+                    {
+                        <div class="avatar-large"></div>
+                    }
                     <div class="profile-name">@Model.FullName</div>
                 </div>
                 <button type="button" class="btn-change-photo" onclick="document.getElementById('photoInput').click();">Change Photo</button>
-                <input type="file" id="photoInput" accept="image/*" hidden />
+                <input type="file" id="photoInput" name="ProfilePhoto" accept="image/*"
+                       onchange="document.getElementById('photoForm').submit();" hidden />
             </div>
+        </form>
+
+        <form method="post">
 
             <div class="badge-row">
-                <span class="verified-badge">&check; Verified Student - @Model.VerifiedSchool</span>
-                <span class="verified-badge">&check; Verified Renter - @Model.VerifiedRentalDorm</span>
+                @if (!string.IsNullOrEmpty(Model.VerifiedSchool))
+                {
+                    <span class="verified-badge">&check; Verified Student - @Model.VerifiedSchool</span>
+                }
+                @if (!string.IsNullOrEmpty(Model.VerifiedRentalDorm))
+                {
+                    <span class="verified-badge">&check; Verified Renter - @Model.VerifiedRentalDorm</span>
+                }
             </div>
 
             <div class="form-grid">
@@ -365,18 +391,44 @@
                     </div>
                 }
             </div>
+        </form>
+
+        <!-- Upload Form -->
+        <form method="post" enctype="multipart/form-data" id="proofForm" asp-page-handler="UploadProof" class="upload-form">
             <button type="button" class="btn-upload" onclick="document.getElementById('proofInput').click();">+ Upload New Proof of Stay</button>
-            <input type="file" id="proofInput" accept=".pdf,image/*" hidden />
+            <input type="file" id="proofInput" name="ProofOfStayFile" accept="image/*"
+                   onchange="document.getElementById('proofForm').submit();" hidden />
+        </form>
 
-            <p class="section-title">ACCOUNT SETTINGS</p>
-            <div class="stacked-group">
-                <label class="form-label">CHANGE PASSWORD</label>
-                <button type="button" class="change-password-link">Update your password</button>
-            </div>
-
+        <!-- Action Row (Save & Logout below Upload button) -->
+        <form method="post">
             <div class="action-row">
                 <button type="submit" asp-page-handler="SaveChanges" class="btn-save">Save Changes</button>
                 <button type="submit" asp-page-handler="Logout" class="btn-logout">Log Out</button>
+            </div>
+        </form>
+
+        <!-- Account Settings Form -->
+        <form method="post" asp-page-handler="ChangePassword">
+            <p class="section-title" style="margin-top:0;">ACCOUNT SETTINGS</p>
+            <div class="stacked-group">
+                <label class="form-label">CHANGE PASSWORD</label>
+                <div class="form-grid" style="margin-bottom:10px;">
+                    <div>
+                        <label class="form-label">CURRENT PASSWORD</label>
+                        <input type="password" name="CurrentPassword" class="form-input" />
+                    </div>
+                    <div></div>
+                    <div>
+                        <label class="form-label">NEW PASSWORD</label>
+                        <input type="password" name="NewPassword" class="form-input" />
+                    </div>
+                    <div>
+                        <label class="form-label">CONFIRM NEW PASSWORD</label>
+                        <input type="password" name="ConfirmNewPassword" class="form-input" />
+                    </div>
+                </div>
+                <button type="submit" class="change-password-link">Update Password</button>
             </div>
         </form>
     </div>

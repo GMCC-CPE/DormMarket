@@ -291,7 +291,14 @@
                     {
                         var startingPrice = dorm.Rooms.Count > 0 ? dorm.Rooms[0].Price.Replace("P ", "₱") : "";
                         <a asp-page="/DormDetailsStudent" asp-route-id="@dorm.Id" class="dorm-card">
-                            <div class="dorm-thumb"></div>
+                            @if (!string.IsNullOrEmpty(dorm.ThumbnailPath))
+                            {
+                                <div class="dorm-thumb" style="background-image:url('@dorm.ThumbnailPath');background-size:cover;background-position:center;"></div>
+                            }
+                            else
+                            {
+                                <div class="dorm-thumb"></div>
+                            }
                             <div class="dorm-info">
                                 <div class="dorm-name">@dorm.Name</div>
                                 <div class="dorm-location">@dorm.Location</div>
@@ -303,6 +310,11 @@
                         </a>
                     }
                 </div>
+
+                @if (Model.Results.Count == 0)
+                {
+                    <p style="color:#9ca3af;font-size:14px;margin-top:20px;">No dormitories match your filters yet.</p>
+                }
             </div>
         </div>
     </form>
