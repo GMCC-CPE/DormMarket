@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using Tesseract;
 
 namespace GMCC.Pages
@@ -16,16 +17,24 @@ namespace GMCC.Pages
     {
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<VerifyStudent> _logger;
+        private readonly MongoDBService _mongoService;
 
         private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png" };
         private static readonly string[] AllowedContentTypes = { "image/jpeg", "image/png" };
         private const long MaxFileSizeBytes = 10 * 1024 * 1024;
 
-        public VerifyStudent(IWebHostEnvironment env, ILogger<VerifyStudent> logger)
+        public VerifyStudent(IWebHostEnvironment env, ILogger<VerifyStudent> logger, MongoDBService mongoService)
         {
             _env = env;
             _logger = logger;
+            _mongoService = mongoService;
         }
+
+        // Carries the account this verification belongs to (set via the
+        // hidden field, populated from the ?studentId= query param that
+        // RegisterStudent redirects with).
+        [BindProperty(SupportsGet = true)]
+        public int StudentId { get; set; }
 
         [BindProperty]
         public string School { get; set; } = string.Empty;
@@ -46,6 +55,12 @@ namespace GMCC.Pages
 
         public async Task<IActionResult> OnPostSubmit()
         {
+            if (StudentId <= 0)
+            {
+                ErrorMessage = "We couldn't tell which account this belongs to. Please register again.";
+                return Page();
+            }
+
             if (string.IsNullOrWhiteSpace(School))
             {
                 ErrorMessage = "Please enter your school/university name.";
@@ -92,34 +107,50 @@ namespace GMCC.Pages
                 return Page();
             }
 
-            var storageFolder = Path.Combine(_env.ContentRootPath, "App_Data", "StudentVerifications");
-            Directory.CreateDirectory(storageFolder);
-
-            var storedFileName = $"{Guid.NewGuid()}{ext}";
-            var fullPath = Path.Combine(storageFolder, storedFileName);
-
+            string relativePath;
             try
             {
+                var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "student-ids");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = $"{StudentId}_{DateTime.UtcNow:yyyyMMddHHmmssfff}{ext}";
+                var fullPath = Path.Combine(uploadsFolder, uniqueFileName);
+
                 await System.IO.File.WriteAllBytesAsync(fullPath, imageBytes);
+
+                relativePath = $"/uploads/student-ids/{uniqueFileName}";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to save student verification file.");
-                ErrorMessage = "Something went wrong saving your file. Please try again.";
+                _logger.LogError(ex, "Failed to save student verification image to disk.");
+                ErrorMessage = "Something went wrong saving your verification. Please try again.";
                 return Page();
             }
 
-            var verification = new StudentVerificationRequest
+            try
             {
-                School = School,
-                SchoolEmail = SchoolEmail,
-                StoredFileName = storedFileName,
-                Status = VerificationStatus.Approved, 
-                SubmittedAtUtc = DateTime.UtcNow,
-                UserId = User.Identity?.Name
-            };// put this in database
+                var update = Builders<studentUser>.Update
+                    .Set(s => s.IdImagePath, relativePath)
+                    .Set(s => s.VerificationStatus, "Approved")
+                    .Set(s => s.VerifiedAtUtc, DateTime.UtcNow)
+                    .Set(s => s.VerifiedSchool, School);
 
-            return RedirectToPage("/RenterVerify", new { studentVerification = "approved" });
+                var result = await _mongoService.Students.UpdateOneAsync(s => s.Id == StudentId, update);
+
+                if (result.MatchedCount == 0)
+                {
+                    ErrorMessage = "We couldn't find your account to attach this verification to. Please register again.";
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to save student verification image to MongoDB.");
+                ErrorMessage = "Something went wrong saving your verification. Please try again.";
+                return Page();
+            }
+
+            return RedirectToPage("/RenterVerify", new { studentVerification = "approved", studentId = StudentId });
         }
 
         private (bool IsSuccess, string Message) RunLocalOcrScan(byte[] imageBytes, string userInputSchool)
@@ -163,9 +194,9 @@ namespace GMCC.Pages
                 {
                     return (false, "Verification failed. We could not read a valid Student ID number pattern on your card.");
                 }
-                string detectedIdNumber = idMatch.Value; 
+                string detectedIdNumber = idMatch.Value;
 
-                string registeredName = User.Identity?.Name ?? ""; 
+                string registeredName = User.Identity?.Name ?? "";
                 if (!string.IsNullOrEmpty(registeredName))
                 {
                     string cleanRegisteredName = registeredName.Replace(" ", "").ToLowerInvariant();
@@ -186,25 +217,7 @@ namespace GMCC.Pages
 
         public IActionResult OnPostSkip()
         {
-            return RedirectToPage("/RenterVerify", new { studentVerification = "skipped" });
+            return RedirectToPage("/RenterVerify", new { studentVerification = "skipped", studentId = StudentId });
         }
-    }
-
-    public enum VerificationStatus
-    {
-        PendingReview,
-        Approved,
-        Rejected
-    }
-
-    public class StudentVerificationRequest
-    {
-        public int Id { get; set; }
-        public string School { get; set; } = string.Empty;
-        public string? SchoolEmail { get; set; }
-        public string StoredFileName { get; set; } = string.Empty;
-        public VerificationStatus Status { get; set; }
-        public DateTime SubmittedAtUtc { get; set; }
-        public string? UserId { get; set; }
     }
 }
